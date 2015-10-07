@@ -14,22 +14,27 @@
 #include <getopt.h>
 
 #define HELP_MSG \
-		"Usage: ais_filter [-m mmsi] [-d debug] [-o longitude -a latitude [-r range]]\n\n"\
+		"Usage: ais_filter [-m mmsi] [-d debug] [-o longitude -a latitude [-r range]] [-p]\n\n"\
 		"-m\tMMSI number to search for (integer)\n"\
 		"-o\tSearch Longitude DDD.DDD\n"\
 		"-a\tSearch Latitude DD.DDD\n"\
 		"-r\tSearch range D.DDD (default 1)\n"\
+		"-p\tPosition messages only - ignore type 5\n"\
 		"-d\tDebug mode)\n"\
 		"-H\tDisplay this help\n"
 
-#define CMD_PARAMS "m:a:o:r:dH"
+#define CMD_PARAMS "m:a:o:r:pdH"
 
 int main( int argc, char *argv[] )
 {
     ais_state     ais;
     char          buf[512];
+    char          buf1[512];
+    char          buf2[512];
     static int debug_nmea=0;
     static int sentence_count=0;
+    static int num_sentences=0;
+    static int position_only=0;
     const char *params=CMD_PARAMS;
 
     /* AIS message structures, only parse ones with positions */
@@ -37,6 +42,7 @@ int main( int argc, char *argv[] )
     aismsg_2  msg_2;
     aismsg_3  msg_3;
     aismsg_4  msg_4;
+    aismsg_5  msg_5;
     aismsg_9  msg_9;
     aismsg_15 msg_15;
     aismsg_18 msg_18;
@@ -87,7 +93,10 @@ int main( int argc, char *argv[] )
 			degree_range = atof(optarg);
 			area_search++;
             break;
-        case 'd':
+        case 'p':
+            position_only = 1;
+            break;
+         case 'd':
             debug_nmea = 1;
             break;
         case 'H':
@@ -116,9 +125,10 @@ int main( int argc, char *argv[] )
     /* Process incoming packets from stdin */
     while( !feof(stdin) )
     {
-
+        if(strlen(buf) > 0 ) strcpy(buf1,buf); //remember first sentence of multi-sentence message
         if (fgets( buf, 511, stdin ) == NULL ) break;
         sentence_count++;
+        num_sentences=ais.total;
         assemble_ret = assemble_vdm( &ais, buf );
         if (assemble_ret == 0)
         {
@@ -161,7 +171,18 @@ int main( int argc, char *argv[] )
                         pos2ddd( msg_4.latitude, msg_4.longitude, &lat_dd, &long_ddd );
                     }
                     break;
-                            
+
+                case 5:
+                	if(position_only == 0 &&  parse_ais_5( &ais, &msg_5 ) == 0 )
+                	{
+                		userid = msg_5.userid;
+                		strcpy(buf2,buf);
+                		strcpy(buf,buf1);
+                		strcat(buf,buf2);
+
+                	}
+                	break;
+
                 case 9:
                     if( parse_ais_9( &ais, &msg_9 ) == 0 )
                     {
@@ -185,6 +206,9 @@ int main( int argc, char *argv[] )
                         pos2ddd( msg_19.latitude, msg_19.longitude, &lat_dd, &long_ddd );
                         //printf( "USER ID   : %ld\n", userid );
                         //printf( "POSITION  : %0.6f %0.6f\n", lat_dd, long_ddd );
+                        strcpy(buf2,buf);
+                        strcpy(buf,buf1);
+                        strcat(buf,buf2);
                     }
                     break;
 
@@ -192,6 +216,9 @@ int main( int argc, char *argv[] )
                 	if( parse_ais_21( &ais, &msg_21 ) == 0 )
                 	{
                 		userid = msg_21.userid;
+                		strcpy(buf2,buf);
+                		strcpy(buf,buf1);
+                		strcat(buf,buf2);
                 		pos2ddd( msg_21.latitude, msg_21.longitude, &lat_dd, &long_ddd );
                 	}
                 	break;
@@ -204,7 +231,7 @@ int main( int argc, char *argv[] )
             if (area_search > 0 && lat_dd >= latitude_min && lat_dd <= latitude_max && long_ddd  >= longitude_min && long_ddd  <= longitude_max)
             {
             	if (mmsi == 0)
-            		printf( "%", buf );
+            		printf( "%s", buf );
             	else if (mmsi > 0 && mmsi==userid)
             		printf( "%s", buf );
             }
