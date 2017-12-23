@@ -44,7 +44,7 @@ int main( int argc, char *argv[] )
     aismsg_4  msg_4;
     aismsg_5  msg_5;
     aismsg_9  msg_9;
-    aismsg_15 msg_15;
+    //aismsg_15 msg_15;
     aismsg_18 msg_18;
     aismsg_19 msg_19;
     aismsg_21 msg_21;
@@ -244,6 +244,10 @@ int main( int argc, char *argv[] )
             	fprintf(stderr, "Line %d ignore: %s", sentence_count, buf );
 
             }
+            //zero out the buffers now we have successfully read a message in
+            strcpy(buf2,"");
+            strcpy(buf1,"");
+            strcpy(buf,"");
             /*
 
             printf( "USER ID   : %ld\n", userid );
@@ -254,6 +258,7 @@ int main( int argc, char *argv[] )
         else if (assemble_ret == 2)
         {
         	fprintf(stderr, "CHECKSUM ERROR: %s\n", buf );
+        	strcpy(buf,"");
         }
     }  /* while */
     
