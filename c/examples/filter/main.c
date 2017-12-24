@@ -48,6 +48,7 @@ int main( int argc, char *argv[] )
     aismsg_18 msg_18;
     aismsg_19 msg_19;
     aismsg_21 msg_21;
+    aismsg_27 msg_27;
     
     int assemble_ret=-1;
 
@@ -222,7 +223,17 @@ int main( int argc, char *argv[] )
                 		pos2ddd( msg_21.latitude, msg_21.longitude, &lat_dd, &long_ddd );
                 	}
                 	break;
+                case 27:
+                	printf( "MSG27 FOUND, %s\n", buf);
 
+                    if( parse_ais_27( &ais, &msg_27 ) == 0 )
+                    {
+                        userid = msg_27.userid;
+                        pos2ddd( msg_27.latitude, msg_27.longitude, &lat_dd, &long_ddd );
+                        printf( "MSG27 USER ID   : %ld\n", userid );
+                        printf( "MSG27 POSITION  : %0.6f %0.6f\n", lat_dd, long_ddd );
+                    }
+                    break;
                 default:
                 	continue;
             }  /* switch msgid */
