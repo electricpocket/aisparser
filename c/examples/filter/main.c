@@ -224,14 +224,14 @@ int main( int argc, char *argv[] )
                 	}
                 	break;
                 case 27:
-                	printf( "MSG27 FOUND, %s\n", buf);
+                	if (debug_nmea > 0) printf( "MSG27 FOUND, %s\n", buf);
 
                     if( parse_ais_27( &ais, &msg_27 ) == 0 )
                     {
                         userid = msg_27.userid;
                         pos2ddd( msg_27.latitude, msg_27.longitude, &lat_dd, &long_ddd );
-                        printf( "MSG27 USER ID   : %ld\n", userid );
-                        printf( "MSG27 POSITION  : %0.6f %0.6f\n", lat_dd, long_ddd );
+                        if (debug_nmea > 0) printf( "MSG27 USER ID   : %ld\n", userid );
+                        if (debug_nmea > 0) printf( "MSG27 POSITION  : %0.6f %0.6f\n", lat_dd, long_ddd );
                     }
                     break;
                 default:
