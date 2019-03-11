@@ -312,6 +312,43 @@ int __stdcall conv_pos( long *latitude, long *longitude )
     return 0;
 }
 
+/* ----------------------------------------------------------------------- */
+/** Convert unsigned 1/10 minute position to signed (as used in Type 27 messages)
+
+    \param latitude pointer to an unsigned latitude
+    \param longitude pointer to an unsigned longitude
+
+    This function converts the raw 2's complement values to signed long
+    1/10000 minute position.
+*/
+/* ----------------------------------------------------------------------- */
+int __stdcall conv_pos27( long *latitude, long *longitude )
+{
+    /* LATITUDE */
+    /* Convert latitude to signed number */
+    if( *latitude & 0x10000 )
+    {
+        *latitude = 0x20000 - *latitude;
+        *latitude *= -1;
+    }
+
+
+
+    /* LONGITUDE */
+    /* Convert longitude to signed number */
+    if( *longitude & 0x20000 )
+    {
+        *longitude = 0x40000 - *longitude;
+        *longitude *= -1;
+    }
+
+    *latitude *= 1000;
+
+    *longitude *= 1000;
+
+    return 0;
+}
+
 
 /* ----------------------------------------------------------------------- */
 /** Assemble AIVDM/VDO sentences
@@ -380,8 +417,7 @@ int __stdcall assemble_vdm( ais_state *state, char *str )
     /* Is the string an AIS message? Allow any start character and any
        device pair.
     */
-    p = find_nmea_start( str );
-    if (p == NULL)
+    if ( (p = find_nmea_start( str )) == NULL )
     {
     	/* Not an AIS message */
     	state->total = 0;
@@ -2049,18 +2085,14 @@ int __stdcall  parse_ais_24( ais_state *state, aismsg_24 *result )
 }
 
 /* ----------------------------------------------------------------------- */
-/** Parse an AIS message 1 into an aismsg_1 structure
-
+/** Parse an AIS message 27 into an aismsg_27 structure
     Ship Position report with SOTDMA Communication state
-
     \param state    pointer to ais_state
     \param result   pointer to parsed message result structure to be filled
-
     return:
       - 0 if no errors
       - 1 if there is an error
       - 2 if there is a packet length error
-
     Note that the latitude and longitude are converted to signed values
     before being returned.
 */
@@ -2095,13 +2127,11 @@ int __stdcall parse_ais_27( ais_state *state, aismsg_27 *result )
     result->cog          = (int)           get_6bit( &state->six_state, 9 );
     result->gnss         = (int)           get_6bit( &state->six_state, 1  );
     result->spare        = (char)          get_6bit( &state->six_state, 1  );
-    result->longitude    = 1000*result->longitude ;
-    result->latitude     = 1000*result->latitude ;
+    result->longitude    = result->longitude ;
+    result->latitude     = result->latitude ;
 
     /* Convert the position to signed value */
-    conv_pos( &result->latitude, &result->longitude);
+    conv_pos27( &result->latitude, &result->longitude);
 
     return 0;
 }
-
-
