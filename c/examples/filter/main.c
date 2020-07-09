@@ -276,7 +276,7 @@ int main( int argc, char *argv[] )
             }
             else if (debug_nmea > 0)
             {
-            	fprintf(stderr, "Line %d ignore: %s", sentence_count, buf );
+            	fprintf(stderr, "userid,%d,Line,%d,ignore,%,", userid,sentence_count, buf );
 
             }
             //zero out the buffers now we have successfully read a message in
