@@ -43,6 +43,11 @@ int main( int argc, char *argv[] )
     aismsg_3  msg_3;
     aismsg_4  msg_4;
     aismsg_5  msg_5;
+    //binary messages
+    aismsg_6  msg_6;
+    aismsg_7  msg_7;
+    aismsg_8  msg_8;
+    //aircraft
     aismsg_9  msg_9;
     //aismsg_15 msg_15;
     aismsg_18 msg_18;
@@ -184,12 +189,31 @@ int main( int argc, char *argv[] )
                 	}
                 	break;
 
-                case 9:
-                    if( parse_ais_9( &ais, &msg_9 ) == 0 )
-                    {
-                        userid = msg_9.userid;
-                        pos2ddd( msg_9.latitude, msg_9.longitude, &lat_dd, &long_ddd );
-                    }
+                case 6:
+                	if( parse_ais_6( &ais, &msg_6 ) == 0 )
+					{
+						userid = msg_6.userid;
+					}
+					break;
+
+                case 7:
+					if( parse_ais_7( &ais, &msg_7 ) == 0 )
+					{
+						userid = msg_7.userid;
+					}
+					break;
+                case 8:
+					if( parse_ais_8( &ais, &msg_8 ) == 0 )
+					{
+						userid = msg_8.userid;
+					}
+					break;
+               case 9:
+					if( parse_ais_9( &ais, &msg_9 ) == 0 )
+					{
+						userid = msg_9.userid;
+						pos2ddd( msg_9.latitude, msg_9.longitude, &lat_dd, &long_ddd );
+					}
                     break;
                 case 18:
                     if( parse_ais_18( &ais, &msg_18 ) == 0 )
