@@ -75,7 +75,7 @@ int main( int argc, char *argv[] )
   
     int opt;
 
-
+    MYSQL *con = mysql_init(NULL);
 
     /* Clear out the structures */
     memset( &ais, 0, sizeof( ais_state ) );

@@ -10,9 +10,9 @@
 VERSION = 0.1
 
 CC	= gcc
-CFLAGS	= -I../../src -g -Wall# -O2
+CFLAGS	= -I../../src -I/opt/homebrew/opt/mysql@5.7/include/mysql -g -Wall# -O2
 
-#LIBS	= -L/opt/homebrew/opt/mysql@5.7/lib
+LIBS	= -L/opt/homebrew/opt/mysql@5.7/lib -lmysqlclient
 SRC	= ../../src/
  
 OBJS		=	main.o $(SRC)nmea.o $(SRC)vdm_parse.o $(SRC)sixbit.o
