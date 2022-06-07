@@ -4,6 +4,7 @@
    Copyright 2006 by Brian C. Lane
    All Rights Reserved
    ----------------------------------------------------------------------- */
+#include <mysql.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -109,6 +110,7 @@ int main( int argc, char *argv[] )
             break;
         case 'h':
         default:
+            fprintf(stderr,"MySQL client version: %s\n", mysql_get_client_info());
             fprintf(stderr, HELP_MSG);
             return EXIT_SUCCESS;
             break;
