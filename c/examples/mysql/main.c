@@ -28,6 +28,13 @@
 
 #define CMD_PARAMS "D:T:U:P:H:pdh"
 
+void finish_with_error(MYSQL *con)
+{
+  fprintf(stderr, "%s\n", mysql_error(con));
+  mysql_close(con);
+  exit(1);
+}
+
 int main( int argc, char *argv[] )
 {
     ais_state     ais;
@@ -67,15 +74,16 @@ int main( int argc, char *argv[] )
     long mmsi = 0;
     
     /* Mysql parameters */
-    char* Database = "";
-    char* Table = "";
-    char* Username = "";
+    char* Database = "compasseye";
+    char* Table = "5324_ais";
+    char* Username = "root";
     char* Password = "";
-    char* Host = "";
+    char* Host = "localhost";
   
     int opt;
 
-    MYSQL *con = mysql_init(NULL);
+    
+    
 
     /* Clear out the structures */
     memset( &ais, 0, sizeof( ais_state ) );
@@ -116,6 +124,22 @@ int main( int argc, char *argv[] )
             break;
         }
     }
+    
+    MYSQL *con = mysql_init(NULL);
+    
+    if (con == NULL)
+  	{
+      fprintf(stderr, "%s\n", mysql_error(con));
+      exit(1);
+  	}
+  	
+  	
+    
+    if (mysql_real_connect(con, Host, Username, Password,
+          Database, 0, NULL, 0) == NULL)
+  	{
+      finish_with_error(con);
+  	}
 
     /* Process incoming packets from stdin */
     while( !feof(stdin) )
@@ -254,7 +278,7 @@ int main( int argc, char *argv[] )
 
             if (debug_nmea > 0)
             {
-            	fprintf(stderr, "mmsi,%ld,Line,%d,ignore,%s\n", userid,sentence_count, buf );
+            	fprintf(stderr, "mmsi,%ld,Line,%d,%s\n", userid,sentence_count, buf );
 
             }
             //zero out the buffers now we have successfully read a message in
